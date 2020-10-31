@@ -1,4 +1,4 @@
-package eu.profinit.appkabe;
+package eu.profinit.smartplans;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

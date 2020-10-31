@@ -14,6 +14,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static eu.profinit.smartplans.db.Tables.PLAN;
 
@@ -29,10 +30,7 @@ public class PlanService {
 
     public List<Plan> getPlans(LocalDate date, String clientId, long _balance) {
         var plans= loadPlans(clientId);
-//        plans.add(new Plan(1L,  true, "Rezerva", null, new BigDecimal("30000"), LocalDate.of(2021, 6, 30), null, null, null));
-//        plans.add(new Plan(2L,  true, "Dovolená", null, new BigDecimal("15000"), LocalDate.of(2021, 6, 30), null, null, null));
-//        plans.add(new Plan(3L,  true, "Dárky vánoce", null, new BigDecimal("5000"), LocalDate.of(2020, 12, 1), null, null, null));
-//        plans.add(new Plan(4L,  true, "Spolufinancování hypo", null, new BigDecimal("400000"), LocalDate.of(2021, 6, 30), null, null, null));
+        var enabledPlans = plans.stream().filter(p -> p.getEnabled()).collect(Collectors.toList());
 
         BigDecimal avgDailyRevenue = getAvgDailyRevenue();
         BigDecimal avgDailyCosts = getAvgDailyCosts();
@@ -41,10 +39,7 @@ public class PlanService {
         BigDecimal balance = new BigDecimal(_balance);
 
         BigDecimal sumDailySavingAmount = BigDecimal.ZERO;
-        for (Plan plan : plans) {
-            if (!plan.getEnabled()) {
-                continue;
-            }
+        for (Plan plan : enabledPlans) {
             int days = (int) ChronoUnit.DAYS.between(date, plan.getDateTo());
             plan.setDaysToEnd(days);
             plan.setDailySavingAmount(plan.getAmount().divide(new BigDecimal(days), 2, RoundingMode.HALF_UP));
@@ -52,12 +47,26 @@ public class PlanService {
             log.info("Plan {}", plan);
         }
 
-        for (Plan plan : plans) {
-            if (!plan.getEnabled()) {
+        recountPercentage(enabledPlans, balance, sumDailySavingAmount);
+
+        var plansToRecount = new ArrayList<Plan>();
+        sumDailySavingAmount = BigDecimal.ZERO;
+        BigDecimal balanceWithoutSuccessPlans = balance;
+        boolean recount = false;
+        for (Plan plan : enabledPlans) {
+            if (plan.getPercentages() <= 100) {
+                sumDailySavingAmount = sumDailySavingAmount.add(plan.getDailySavingAmount());
+                plansToRecount.add(plan);
                 continue;
             }
-            BigDecimal b = balance.multiply(plan.getDailySavingAmount()).divide(sumDailySavingAmount, 2, RoundingMode.HALF_UP);
-            plan.setPercentages(b.multiply(new BigDecimal(100)).divide(plan.getAmount(), 0, RoundingMode.HALF_UP).intValue());
+            recount = true;
+            balanceWithoutSuccessPlans = balanceWithoutSuccessPlans.subtract(plan.getAmount());
+            plan.setPercentages(100);
+            log.info("Plan is over 100% {}", plan);
+        }
+        if (recount) {
+            log.info("Recounting percentage");
+            recountPercentage(plansToRecount, balanceWithoutSuccessPlans, sumDailySavingAmount);
         }
 
         BigDecimal availableProfit = profit;
@@ -76,6 +85,15 @@ public class PlanService {
 
 
         return plans;
+    }
+
+    private void recountPercentage(List<Plan> enabledPlans, BigDecimal balance, BigDecimal sumDailySavingAmount) {
+        log.info("Count percentage (balance {}, sumDailySavingAmount {})", balance, sumDailySavingAmount);
+        for (Plan plan : enabledPlans) {
+            BigDecimal b = balance.multiply(plan.getDailySavingAmount()).divide(sumDailySavingAmount, 2, RoundingMode.HALF_UP);
+            plan.setPercentages(b.multiply(new BigDecimal(100)).divide(plan.getAmount(), 0, RoundingMode.HALF_UP).intValue());
+            log.info("Plan {}", plan);
+        }
     }
 
     public List<Plan> loadPlans(String clientId) {
@@ -107,10 +125,6 @@ public class PlanService {
 
     public BigDecimal getAvgDailyCosts() {
         return new BigDecimal("15000").divide(new BigDecimal(30), 2, RoundingMode.HALF_UP);
-    }
-
-    public BigDecimal getAccountBalance() {
-        return new BigDecimal("100000");
     }
 
     public Plan insert(String clientId, Plan _plan) {

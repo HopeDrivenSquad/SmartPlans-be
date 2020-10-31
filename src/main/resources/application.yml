@@ -3,6 +3,14 @@ server:
   servlet:
     context-path: /api
 
+spring:
+  flyway:
+    enabled: false
+  datasource:
+    url: jdbc:postgresql://smartplans.postgres.database.azure.com:5432/smartplans
+    username: smartplans@smartplans
+    password: D71PLU!6B7Px!Lpn0#hh
+
 management:
   endpoints:
     web:

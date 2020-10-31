@@ -6,10 +6,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @EnableTransactionManagement
-public class AppkaBeApplication {
+public class SmartPlansBeApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(AppkaBeApplication.class, args);
+        SpringApplication.run(SmartPlansBeApplication.class, args);
     }
 
 }

@@ -19,9 +19,8 @@ public class PlanController {
     private final PlanService planService;
 
     @GetMapping
-    public List<Plan> getPlans(@RequestParam long balance) {
-        var plans = planService.getPlans(LocalDate.now(), balance);
-
+    public List<Plan> getPlans(@RequestParam long balance, @RequestParam String clientId) {
+        var plans = planService.getPlans(clientId, LocalDate.now(), balance);
 
         return plans;
     }

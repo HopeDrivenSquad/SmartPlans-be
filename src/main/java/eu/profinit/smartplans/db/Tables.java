@@ -4,6 +4,9 @@
 package eu.profinit.smartplans.db;
 
 
+import eu.profinit.smartplans.db.tables.Category;
+import eu.profinit.smartplans.db.tables.Plan;
+import eu.profinit.smartplans.db.tables.Tag;
 import eu.profinit.smartplans.db.tables.Transaction;
 
 
@@ -12,6 +15,21 @@ import eu.profinit.smartplans.db.tables.Transaction;
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tables {
+
+    /**
+     * The table <code>public.category</code>.
+     */
+    public static final Category CATEGORY = Category.CATEGORY;
+
+    /**
+     * The table <code>public.plan</code>.
+     */
+    public static final Plan PLAN = Plan.PLAN;
+
+    /**
+     * The table <code>public.tag</code>.
+     */
+    public static final Tag TAG = Tag.TAG;
 
     /**
      * The table <code>public.transaction</code>.

@@ -4,6 +4,7 @@
 package eu.profinit.smartplans.db;
 
 
+import eu.profinit.smartplans.db.tables.Plan;
 import eu.profinit.smartplans.db.tables.Transaction;
 
 import org.jooq.Index;
@@ -22,6 +23,7 @@ public class Indexes {
     // -------------------------------------------------------------------------
 
     public static final Index IDX_CLIENT = Indexes0.IDX_CLIENT;
+    public static final Index IDX_PLAN = Indexes0.IDX_PLAN;
 
     // -------------------------------------------------------------------------
     // [#1459] distribute members to avoid static initialisers > 64kb
@@ -29,5 +31,6 @@ public class Indexes {
 
     private static class Indexes0 {
         public static Index IDX_CLIENT = Internal.createIndex("idx_client", Transaction.TRANSACTION, new OrderField[] { Transaction.TRANSACTION.CLIENT_ID, Transaction.TRANSACTION.TRANSACTION_ID }, true);
+        public static Index IDX_PLAN = Internal.createIndex("idx_plan", Plan.PLAN, new OrderField[] { Plan.PLAN.CLIENT_ID, Plan.PLAN.ID }, true);
     }
 }

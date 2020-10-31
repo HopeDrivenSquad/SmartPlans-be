@@ -8,13 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 
 import static eu.profinit.smartplans.db.Tables.TRANSACTION;
 
 @Service
 public class TransactionService {
 
-    private DSLContext dsl;
+    private final DSLContext dsl;
 
     @Autowired
     public TransactionService(DSLContext dsl) {
@@ -22,11 +23,11 @@ public class TransactionService {
     }
 
     public TransactionApi getTransaction(Long id) {
-        final Result<Record4<Long, BigDecimal, String, String>> result = dsl
+        final Result<Record4<Long, BigDecimal, String, String[]>> result = dsl
                 .select(TRANSACTION.TRANSACTION_ID,
                         TRANSACTION.AMOUNT,
                         TRANSACTION.MERCHANT_CATEGORY,
-                        TRANSACTION.MERCHANT_CATEGORY_ID)
+                        TRANSACTION.TAG_ARRAY)
                 .from(TRANSACTION)
                 .where(TRANSACTION.TRANSACTION_ID.equal(id))
                 .fetch();
@@ -34,7 +35,8 @@ public class TransactionService {
         final TransactionApi transactionApi = new TransactionApi();
         transactionApi.setTransactionId(result.getValue(0, TRANSACTION.TRANSACTION_ID));
         transactionApi.setAmount(result.getValue(0, TRANSACTION.AMOUNT));
-        transactionApi.setCategory(result.getValue(0, TRANSACTION.MERCHANT_CATEGORY));
+        transactionApi.setMerchantCategory(result.getValue(0, TRANSACTION.MERCHANT_CATEGORY));
+        transactionApi.setTags(Arrays.asList(result.getValue(0, TRANSACTION.TAG_ARRAY)));
 
         return transactionApi;
     }

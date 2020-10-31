@@ -1,7 +1,13 @@
 package eu.profinit.smartplans.service;
 
+import eu.profinit.smartplans.db.Tables;
+import eu.profinit.smartplans.db.tables.records.PlanRecord;
 import eu.profinit.smartplans.model.Plan;
 import lombok.extern.slf4j.Slf4j;
+import org.jooq.DSLContext;
+import org.jooq.Record5;
+import org.jooq.Result;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -10,13 +16,24 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import static eu.profinit.smartplans.db.Tables.PLAN;
 
 @Service
 @Slf4j
 public class PlanService {
 
-    public List<Plan> getPlans(LocalDate date, long _balance) {
-        var plans= loadPlans();
+    private final DSLContext dsl;
+
+    @Autowired
+    public PlanService(DSLContext dsl) {
+        this.dsl = dsl;
+    }
+
+    public List<Plan> getPlans(String clientId, LocalDate date, long _balance) {
+
+        var plans= loadPlans(clientId);
 
         BigDecimal avgDailyRevenue = getAvgDailyRevenue();
         BigDecimal avgDailyCosts = getAvgDailyCosts();
@@ -62,7 +79,13 @@ public class PlanService {
         return plans;
     }
 
-    public List<Plan> loadPlans() {
+    public List<Plan> loadPlans(String clientId) {
+        final Map<Integer, PlanRecord> integerPlanRecordMap = dsl
+                .selectFrom(PLAN)
+                .where(PLAN.CLIENT_ID.equal(Integer.valueOf(clientId))) // TODO validace na integer
+                .fetch().intoMap(PLAN.ID);
+
+
         var plans = new ArrayList<Plan>();
 
         plans.add(new Plan(1L,  true, "Rezerva", null, new BigDecimal("30000"), LocalDate.of(2021, 6, 30), null, null, null));

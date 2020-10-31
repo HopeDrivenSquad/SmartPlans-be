@@ -4,12 +4,16 @@
 package eu.profinit.smartplans.db;
 
 
+import eu.profinit.smartplans.db.tables.Category;
+import eu.profinit.smartplans.db.tables.Plan;
+import eu.profinit.smartplans.db.tables.Tag;
 import eu.profinit.smartplans.db.tables.Transaction;
 
 import java.util.Arrays;
 import java.util.List;
 
 import org.jooq.Catalog;
+import org.jooq.Sequence;
 import org.jooq.Table;
 import org.jooq.impl.SchemaImpl;
 
@@ -20,12 +24,27 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = 1621957656;
+    private static final long serialVersionUID = 1409592532;
 
     /**
      * The reference instance of <code>public</code>
      */
     public static final Public PUBLIC = new Public();
+
+    /**
+     * The table <code>public.category</code>.
+     */
+    public final Category CATEGORY = Category.CATEGORY;
+
+    /**
+     * The table <code>public.plan</code>.
+     */
+    public final Plan PLAN = Plan.PLAN;
+
+    /**
+     * The table <code>public.tag</code>.
+     */
+    public final Tag TAG = Tag.TAG;
 
     /**
      * The table <code>public.transaction</code>.
@@ -46,8 +65,17 @@ public class Public extends SchemaImpl {
     }
 
     @Override
+    public final List<Sequence<?>> getSequences() {
+        return Arrays.<Sequence<?>>asList(
+            Sequences.PLAN_ID_SEQ);
+    }
+
+    @Override
     public final List<Table<?>> getTables() {
         return Arrays.<Table<?>>asList(
+            Category.CATEGORY,
+            Plan.PLAN,
+            Tag.TAG,
             Transaction.TRANSACTION);
     }
 }

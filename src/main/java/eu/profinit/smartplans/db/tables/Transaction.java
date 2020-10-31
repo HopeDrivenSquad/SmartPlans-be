@@ -19,7 +19,7 @@ import org.jooq.ForeignKey;
 import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row14;
+import org.jooq.Row15;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -35,7 +35,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Transaction extends TableImpl<TransactionRecord> {
 
-    private static final long serialVersionUID = 2075619716;
+    private static final long serialVersionUID = 397340653;
 
     /**
      * The reference instance of <code>public.transaction</code>
@@ -63,7 +63,7 @@ public class Transaction extends TableImpl<TransactionRecord> {
     /**
      * The column <code>public.transaction.client_id</code>.
      */
-    public final TableField<TransactionRecord, BigDecimal> CLIENT_ID = createField(DSL.name("client_id"), org.jooq.impl.SQLDataType.NUMERIC, this, "");
+    public final TableField<TransactionRecord, Integer> CLIENT_ID = createField(DSL.name("client_id"), org.jooq.impl.SQLDataType.INTEGER, this, "");
 
     /**
      * The column <code>public.transaction.client_gender</code>.
@@ -119,6 +119,11 @@ public class Transaction extends TableImpl<TransactionRecord> {
      * The column <code>public.transaction.country</code>.
      */
     public final TableField<TransactionRecord, String> COUNTRY = createField(DSL.name("country"), org.jooq.impl.SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>public.transaction.tag_array</code>.
+     */
+    public final TableField<TransactionRecord, String[]> TAG_ARRAY = createField(DSL.name("tag_array"), org.jooq.impl.SQLDataType.CLOB.getArrayDataType(), this, "");
 
     /**
      * Create a <code>public.transaction</code> table reference
@@ -200,11 +205,11 @@ public class Transaction extends TableImpl<TransactionRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row14 type methods
+    // Row15 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row14<Long, LocalDate, BigDecimal, String, Integer, BigDecimal, String, String, String, String, String, String, String, String> fieldsRow() {
-        return (Row14) super.fieldsRow();
+    public Row15<Long, LocalDate, Integer, String, Integer, BigDecimal, String, String, String, String, String, String, String, String, String[]> fieldsRow() {
+        return (Row15) super.fieldsRow();
     }
 }

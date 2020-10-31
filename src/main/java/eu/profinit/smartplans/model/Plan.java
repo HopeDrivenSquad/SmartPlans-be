@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class Plan {
 
-    private Long id;
+    private Integer id;
     private Boolean enabled;
     private String name;
     private Integer percentages;

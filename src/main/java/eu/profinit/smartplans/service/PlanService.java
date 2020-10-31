@@ -1,12 +1,9 @@
 package eu.profinit.smartplans.service;
 
-import eu.profinit.smartplans.db.Tables;
 import eu.profinit.smartplans.db.tables.records.PlanRecord;
 import eu.profinit.smartplans.model.Plan;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
-import org.jooq.Record5;
-import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +20,6 @@ import static eu.profinit.smartplans.db.Tables.PLAN;
 @Service
 @Slf4j
 public class PlanService {
-
     private final DSLContext dsl;
 
     @Autowired
@@ -31,9 +27,12 @@ public class PlanService {
         this.dsl = dsl;
     }
 
-    public List<Plan> getPlans(String clientId, LocalDate date, long _balance) {
-
+    public List<Plan> getPlans(LocalDate date, String clientId, long _balance) {
         var plans= loadPlans(clientId);
+//        plans.add(new Plan(1L,  true, "Rezerva", null, new BigDecimal("30000"), LocalDate.of(2021, 6, 30), null, null, null));
+//        plans.add(new Plan(2L,  true, "Dovolená", null, new BigDecimal("15000"), LocalDate.of(2021, 6, 30), null, null, null));
+//        plans.add(new Plan(3L,  true, "Dárky vánoce", null, new BigDecimal("5000"), LocalDate.of(2020, 12, 1), null, null, null));
+//        plans.add(new Plan(4L,  true, "Spolufinancování hypo", null, new BigDecimal("400000"), LocalDate.of(2021, 6, 30), null, null, null));
 
         BigDecimal avgDailyRevenue = getAvgDailyRevenue();
         BigDecimal avgDailyCosts = getAvgDailyCosts();
@@ -85,15 +84,21 @@ public class PlanService {
                 .where(PLAN.CLIENT_ID.equal(Integer.valueOf(clientId))) // TODO validace na integer
                 .fetch().intoMap(PLAN.ID);
 
-
         var plans = new ArrayList<Plan>();
-
-        plans.add(new Plan(1L,  true, "Rezerva", null, new BigDecimal("30000"), LocalDate.of(2021, 6, 30), null, null, null));
-        plans.add(new Plan(2L,  true, "Dovolená", null, new BigDecimal("15000"), LocalDate.of(2021, 6, 30), null, null, null));
-        plans.add(new Plan(3L,  true, "Dárky vánoce", null, new BigDecimal("5000"), LocalDate.of(2020, 12, 1), null, null, null));
-        plans.add(new Plan(4L,  true, "Spolufinancování hypo", null, new BigDecimal("400000"), LocalDate.of(2021, 6, 30), null, null, null));
+        integerPlanRecordMap.values().forEach(pr -> plans.add(convertRecord(pr)));
 
         return plans;
+    }
+
+    private Plan convertRecord(PlanRecord pr) {
+        var plan = new Plan();
+        plan.setId(pr.getId());
+        plan.setAmount(pr.getAmount());
+        plan.setDateTo(pr.getDateTo());
+        plan.setName(pr.getName());
+        plan.setEnabled(pr.getEnabled());
+
+        return plan;
     }
 
     public BigDecimal getAvgDailyRevenue() {
@@ -108,4 +113,39 @@ public class PlanService {
         return new BigDecimal("100000");
     }
 
+    public Plan insert(String clientId, Plan _plan) {
+        PlanRecord pr = dsl.insertInto(PLAN)
+                .set(PLAN.CLIENT_ID, Integer.valueOf(clientId))
+                .set(PLAN.AMOUNT, _plan.getAmount())
+                .set(PLAN.DATE_TO, _plan.getDateTo())
+                .set(PLAN.ENABLED, _plan.getEnabled())
+                .set(PLAN.NAME, _plan.getName())
+                .returning()
+                .fetchOne();
+
+        Plan plan = convertRecord(pr);
+
+        return plan;
+    }
+
+    public Plan update(Plan _plan) {
+        dsl.update(PLAN)
+                .set(PLAN.ENABLED, _plan.getEnabled())
+                .where(PLAN.ID.eq(_plan.getId()))
+                .execute();
+
+        PlanRecord pr = dsl.selectFrom(PLAN)
+            .where(PLAN.ID.eq(_plan.getId()))
+            .fetchOne();
+
+        Plan plan = convertRecord(pr);
+
+        return plan;
+    }
+
+    public void delete(int id) {
+        dsl.delete(PLAN)
+                .where(PLAN.ID.equal(id))
+                .execute();
+    }
 }

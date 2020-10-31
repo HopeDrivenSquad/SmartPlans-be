@@ -2,12 +2,13 @@ package eu.profinit.smartplans.service;
 
 import eu.profinit.smartplans.api.TransactionApi;
 import org.jooq.DSLContext;
-import org.jooq.Record4;
+import org.jooq.Record5;
 import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Arrays;
 
 import static eu.profinit.smartplans.db.Tables.TRANSACTION;
@@ -23,9 +24,10 @@ public class TransactionService {
     }
 
     public TransactionApi getTransaction(Long id) {
-        final Result<Record4<Long, BigDecimal, String, String[]>> result = dsl
+        final Result<Record5<Long, BigDecimal, LocalDate, String, String[]>> fetch = dsl
                 .select(TRANSACTION.TRANSACTION_ID,
                         TRANSACTION.AMOUNT,
+                        TRANSACTION.TX_DATE,
                         TRANSACTION.MERCHANT_CATEGORY,
                         TRANSACTION.TAG_ARRAY)
                 .from(TRANSACTION)
@@ -33,10 +35,11 @@ public class TransactionService {
                 .fetch();
 
         final TransactionApi transactionApi = new TransactionApi();
-        transactionApi.setTransactionId(result.getValue(0, TRANSACTION.TRANSACTION_ID));
-        transactionApi.setAmount(result.getValue(0, TRANSACTION.AMOUNT));
-        transactionApi.setMerchantCategory(result.getValue(0, TRANSACTION.MERCHANT_CATEGORY));
-        transactionApi.setTags(Arrays.asList(result.getValue(0, TRANSACTION.TAG_ARRAY)));
+        transactionApi.setTransactionId(fetch.getValue(0, TRANSACTION.TRANSACTION_ID));
+        transactionApi.setAmount(fetch.getValue(0, TRANSACTION.AMOUNT));
+        transactionApi.setTransactionDate(fetch.getValue(0, TRANSACTION.TX_DATE));
+        transactionApi.setMerchantCategory(fetch.getValue(0, TRANSACTION.MERCHANT_CATEGORY));
+        transactionApi.setTags(Arrays.asList(fetch.getValue(0, TRANSACTION.TAG_ARRAY)));
 
         return transactionApi;
     }

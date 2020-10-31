@@ -18,4 +18,6 @@ public class Summary {
     // kolik mám možnost utratit (saved - plan)
     private BigDecimal totalAmountPerMonth;
 
+    private BigDecimal emergencyBalance;
+
 }

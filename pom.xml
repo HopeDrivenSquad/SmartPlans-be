@@ -15,7 +15,7 @@
     <description>HackPrague 2020 project</description>
 
     <properties>
-        <java.version>15</java.version>
+        <java.version>11</java.version>
         <docker.image.prefix>appka.azurecr.io</docker.image.prefix>
         <jib-maven-plugin.version>2.5.2</jib-maven-plugin.version>
     </properties>
@@ -80,8 +80,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>14</source>
-                    <target>14</target>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
         </plugins>

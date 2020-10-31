@@ -131,11 +131,11 @@ public class PlanService {
     public Plan update(Plan _plan) {
         dsl.update(PLAN)
                 .set(PLAN.ENABLED, _plan.getEnabled())
-                .where(PLAN.ID.eq(_plan.getId()))
+                .where(PLAN.ID.equal(_plan.getId()))
                 .execute();
 
         PlanRecord pr = dsl.selectFrom(PLAN)
-            .where(PLAN.ID.eq(_plan.getId()))
+            .where(PLAN.ID.equal(_plan.getId()))
             .fetchOne();
 
         Plan plan = convertRecord(pr);

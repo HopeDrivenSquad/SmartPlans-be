@@ -1,6 +1,7 @@
 package eu.profinit.smartplans.config;
 
 import eu.profinit.smartplans.exception.ExceptionTranslator;
+import org.jooq.SQLDialect;
 import org.jooq.impl.DataSourceConnectionProvider;
 import org.jooq.impl.DefaultConfiguration;
 import org.jooq.impl.DefaultDSLContext;
@@ -37,6 +38,7 @@ public class InitialConfiguration {
 
     public DefaultConfiguration configuration() {
         DefaultConfiguration jooqConfiguration = new DefaultConfiguration();
+        jooqConfiguration.setSQLDialect(SQLDialect.POSTGRES);
         jooqConfiguration.set(connectionProvider());
         jooqConfiguration
                 .set(new DefaultExecuteListenerProvider(exceptionTransformer()));

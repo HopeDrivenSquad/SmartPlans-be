@@ -12,11 +12,11 @@ import java.math.BigDecimal;
 public class Summary {
 
     // kolik ušetří
-    private BigDecimal savedAmountPerMonth;
+    private BigDecimal amountSavedPerMonth;
     // plánované výdaje costs
-    private BigDecimal planAmountPerMonth;
+    private BigDecimal amountPlanPerMonth;
     // kolik mám možnost utratit (saved - plan)
-    private BigDecimal totalAmountPerMonth;
+    private BigDecimal amountTotalPerMonth;
 
     private BigDecimal emergencyBalance;
 

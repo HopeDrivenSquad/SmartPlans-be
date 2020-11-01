@@ -33,9 +33,9 @@ public class PlanService {
         BigDecimal threeMonthEarnings = transactionService.getThreeMonthEarnings(Long.valueOf(clientId));
         BigDecimal threeMonthSpending = transactionService.getThreeMonthSpending(Long.valueOf(clientId));
         summary.setEmergencyBalance(threeMonthSpending);
-        summary.setSavedAmountPerMonth(threeMonthEarnings.divide(new BigDecimal(3), 2, RoundingMode.HALF_UP));
-        summary.setPlanAmountPerMonth(threeMonthSpending.divide(new BigDecimal(3), 2, RoundingMode.HALF_UP));
-        summary.setTotalAmountPerMonth(summary.getSavedAmountPerMonth().subtract(summary.getPlanAmountPerMonth()));
+        summary.setAmountSavedPerMonth(threeMonthEarnings.divide(new BigDecimal(3), 2, RoundingMode.HALF_UP));
+        summary.setAmountPlanPerMonth(threeMonthSpending.divide(new BigDecimal(3), 2, RoundingMode.HALF_UP));
+        summary.setAmountTotalPerMonth(summary.getAmountSavedPerMonth().subtract(summary.getAmountPlanPerMonth()));
 
         var plans= loadPlans(clientId);
         PlansSummary plansSummary = new PlansSummary(summary, plans);
@@ -48,6 +48,9 @@ public class PlanService {
         BigDecimal profit = avgDailyRevenue.subtract(avgDailyCosts);
         log.info("Daily revenue {}, costs {}, profit {}", avgDailyRevenue, avgDailyCosts, profit);
         BigDecimal balance = new BigDecimal(_balance).subtract(summary.getEmergencyBalance());
+        if (balance.compareTo(BigDecimal.ZERO) < 0) {
+            balance = BigDecimal.ZERO;
+        }
 
         BigDecimal sumDailySavingAmount = BigDecimal.ZERO;
         for (Plan plan : enabledPlans) {

@@ -30,7 +30,11 @@ public class PlanService {
 
     public List<Plan> getPlans(LocalDate date, String clientId, long _balance) {
         var plans= loadPlans(clientId);
-        var enabledPlans = plans.stream().filter(p -> p.getEnabled()).collect(Collectors.toList());
+        var enabledPlans = plans.stream()
+                .filter(p -> {
+                    return p.getEnabled();
+                })
+                .collect(Collectors.toList());
 
         BigDecimal avgDailyRevenue = getAvgDailyRevenue();
         BigDecimal avgDailyCosts = getAvgDailyCosts();
@@ -114,7 +118,8 @@ public class PlanService {
         plan.setAmount(pr.getAmount());
         plan.setDateTo(pr.getDateTo());
         plan.setName(pr.getName());
-        plan.setEnabled(pr.getEnabled());
+        // FIXME: bad mapping - return null when is false in db
+        plan.setEnabled(pr.getEnabled() != null ? pr.getEnabled() : false);
 
         return plan;
     }

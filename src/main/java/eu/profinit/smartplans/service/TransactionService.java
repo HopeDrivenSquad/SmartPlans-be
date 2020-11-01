@@ -78,7 +78,7 @@ public class TransactionService {
 
         results.forEach(r -> {
             final OverviewCategory overviewCategory = new OverviewCategory();
-            overviewCategory.setAmountSavedPerMonth(r.get(0, BigDecimal.class));
+            overviewCategory.setAmountSavedPerMonth(r.get(0, BigDecimal.class).abs());
             overviewCategory.setName(r.get(2, String.class));
 
             final String txIds = r.get(1, String.class);

@@ -2,7 +2,6 @@ package eu.profinit.smartplans.controller;
 
 import eu.profinit.smartplans.model.Plan;
 import eu.profinit.smartplans.model.PlansSummary;
-import eu.profinit.smartplans.model.Summary;
 import eu.profinit.smartplans.service.PlanService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +19,7 @@ public class PlanController {
 
     @GetMapping
     public PlansSummary getPlans(@RequestParam String clientId, @RequestParam long currentBalance) {
-        var plans = planService.getPlans(LocalDate.now(), clientId, currentBalance);
-        var summary = new Summary();
-        var plansSummary = new PlansSummary(summary, plans);
+        var plansSummary = planService.getPlansSummary(LocalDate.now(), clientId, currentBalance);
 
         return plansSummary;
     }

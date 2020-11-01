@@ -2,6 +2,9 @@ package eu.profinit.smartplans.service;
 
 import eu.profinit.smartplans.db.tables.records.PlanRecord;
 import eu.profinit.smartplans.model.Plan;
+import eu.profinit.smartplans.model.PlansSummary;
+import eu.profinit.smartplans.model.Summary;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,25 +23,31 @@ import static eu.profinit.smartplans.db.Tables.PLAN;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class PlanService {
     private final DSLContext dsl;
+    private final TransactionService transactionService;
 
-    @Autowired
-    public PlanService(DSLContext dsl) {
-        this.dsl = dsl;
-    }
+    public PlansSummary getPlansSummary(LocalDate date, String clientId, long _balance) {
+        var summary = new Summary();
+        BigDecimal threeMonthEarnings = transactionService.getThreeMonthEarnings(Long.valueOf(clientId));
+        BigDecimal threeMonthSpending = transactionService.getThreeMonthSpending(Long.valueOf(clientId));
+        summary.setEmergencyBalance(threeMonthSpending);
+        summary.setSavedAmountPerMonth(threeMonthEarnings.divide(new BigDecimal(3), 2, RoundingMode.HALF_UP));
+        summary.setPlanAmountPerMonth(threeMonthSpending.divide(new BigDecimal(3), 2, RoundingMode.HALF_UP));
+        summary.setTotalAmountPerMonth(summary.getSavedAmountPerMonth().subtract(summary.getPlanAmountPerMonth()));
 
-    public List<Plan> getPlans(LocalDate date, String clientId, long _balance) {
         var plans= loadPlans(clientId);
+        PlansSummary plansSummary = new PlansSummary(summary, plans);
         var enabledPlans = plans.stream()
                 .filter(Plan::getEnabled)
                 .collect(Collectors.toList());
 
-        BigDecimal avgDailyRevenue = getAvgDailyRevenue();
-        BigDecimal avgDailyCosts = getAvgDailyCosts();
+        BigDecimal avgDailyRevenue = threeMonthEarnings.divide(new BigDecimal(90), 2, RoundingMode.HALF_UP);
+        BigDecimal avgDailyCosts = threeMonthSpending.divide(new BigDecimal(90), 2, RoundingMode.HALF_UP);
         BigDecimal profit = avgDailyRevenue.subtract(avgDailyCosts);
         log.info("Daily revenue {}, costs {}, profit {}", avgDailyRevenue, avgDailyCosts, profit);
-        BigDecimal balance = new BigDecimal(_balance);
+        BigDecimal balance = new BigDecimal(_balance).subtract(summary.getEmergencyBalance());
 
         BigDecimal sumDailySavingAmount = BigDecimal.ZERO;
         for (Plan plan : enabledPlans) {
@@ -85,8 +94,7 @@ public class PlanService {
             log.info("AvailableProfit {} haveTosaving {} After count plan {}", availableProfit, haveTosaving, plan);
         }
 
-
-        return plans;
+        return plansSummary;
     }
 
     private void recountPercentage(List<Plan> enabledPlans, BigDecimal balance, BigDecimal sumDailySavingAmount) {
@@ -120,14 +128,6 @@ public class PlanService {
         plan.setEnabled(pr.getEnabled() != null ? pr.getEnabled() : false);
 
         return plan;
-    }
-
-    public BigDecimal getAvgDailyRevenue() {
-        return new BigDecimal("30000").divide(new BigDecimal(30), 2, RoundingMode.HALF_UP);
-    }
-
-    public BigDecimal getAvgDailyCosts() {
-        return new BigDecimal("15000").divide(new BigDecimal(30), 2, RoundingMode.HALF_UP);
     }
 
     public Plan insert(String clientId, Plan _plan) {

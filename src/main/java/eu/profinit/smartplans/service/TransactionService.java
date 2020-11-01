@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -104,22 +105,22 @@ public class TransactionService {
     }
 
     BigDecimal getThreeMonthSpending(Long clientId) {
-        final BigDecimal bigDecimal = dsl.select(sum(TRANSACTION.AMOUNT).div(MONTHS_HISTORY))
+        final BigDecimal bigDecimal = dsl.select(sum(TRANSACTION.AMOUNT))
                 .from(TRANSACTION)
                 .where(TRANSACTION.CLIENT_ID.eq(clientId.intValue())
                         .and(TRANSACTION.AMOUNT.le(BigDecimal.ZERO))
                         .and(TRANSACTION.TX_DATE.ge(LocalDate.now().minus(MONTHS_HISTORY, ChronoUnit.MONTHS))))
                 .fetch().get(0).get(0, BigDecimal.class);
-        return isNull(bigDecimal) ? BigDecimal.ZERO : bigDecimal;
+        return isNull(bigDecimal) ? BigDecimal.ZERO : bigDecimal.divide(new BigDecimal(100), 2, RoundingMode.HALF_UP).multiply(new BigDecimal(-1));
     }
 
     BigDecimal getThreeMonthEarnings(Long clientId) {
-        final BigDecimal bigDecimal = dsl.select(sum(TRANSACTION.AMOUNT).div(MONTHS_HISTORY))
+        final BigDecimal bigDecimal = dsl.select(sum(TRANSACTION.AMOUNT))
                 .from(TRANSACTION)
                 .where(TRANSACTION.CLIENT_ID.eq(clientId.intValue())
                         .and(TRANSACTION.AMOUNT.ge(BigDecimal.ZERO))
                         .and(TRANSACTION.TX_DATE.ge(LocalDate.now().minus(MONTHS_HISTORY, ChronoUnit.MONTHS))))
                 .fetch().get(0).get(0, BigDecimal.class);
-        return isNull(bigDecimal) ? BigDecimal.ZERO : bigDecimal;
+        return isNull(bigDecimal) ? BigDecimal.ZERO : bigDecimal.divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
     }
 }

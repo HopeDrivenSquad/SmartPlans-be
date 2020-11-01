@@ -14,7 +14,6 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Objects;
 
 import static eu.profinit.smartplans.db.Tables.TAG;
 import static eu.profinit.smartplans.db.Tables.TRANSACTION;
@@ -95,7 +94,10 @@ public class TransactionService {
         });
 
         OverviewSummary overviewSummary = new OverviewSummary();
-        overviewSummary.setAmountSavedPerMonth(BigDecimal.TEN);
+        final BigDecimal overallSaved = transactionOverview.getCategories().stream()
+                .map(OverviewCategory::getAmountSavedPerMonth)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        overviewSummary.setAmountSavedPerMonth(overallSaved);
         transactionOverview.setSummary(overviewSummary);
 
         return transactionOverview;

@@ -31,9 +31,7 @@ public class PlanService {
     public List<Plan> getPlans(LocalDate date, String clientId, long _balance) {
         var plans= loadPlans(clientId);
         var enabledPlans = plans.stream()
-                .filter(p -> {
-                    return p.getEnabled();
-                })
+                .filter(Plan::getEnabled)
                 .collect(Collectors.toList());
 
         BigDecimal avgDailyRevenue = getAvgDailyRevenue();
